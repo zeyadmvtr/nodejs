@@ -3,7 +3,7 @@ pipeline {
  
     environment {
         APP_NAME = 'new-app-nti' 
-        REPO_URL = "https://github.com/zeyadmvtr/nodejs-.git"
+        REPO_URL = "https://github.com/zeyadmvtr/nodejs.git"
     }
 
     stages {
@@ -16,9 +16,7 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
-                    sh """
-                        docker build -t ${APP_NAME}:${BUILD_NUMBER} .
-                    """
+                    sh "docker build -t ${APP_NAME}:${BUILD_NUMBER} ."
                 }
             }
         }
@@ -27,15 +25,11 @@ pipeline {
             steps {
                 script {
                     withCredentials([usernamePassword(credentialsId: 'docker', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
-
-                        sh """
-                            echo ${DOCKER_PASSWORD} | docker login -u ${DOCKER_USERNAME} --password-stdin
-
-                            docker tag ${APP_NAME}:${BUILD_NUMBER} ${DOCKER_USERNAME}/${APP_NAME}:${BUILD_NUMBER}
-
-                            docker push ${DOCKER_USERNAME}/${APP_NAME}:${BUILD_NUMBER}
-                        """
-
+                        sh '''
+                            echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+                            docker tag "${APP_NAME}:${BUILD_NUMBER}" "${DOCKER_USERNAME}/${APP_NAME}:${BUILD_NUMBER}"
+                            docker push "${DOCKER_USERNAME}/${APP_NAME}:${BUILD_NUMBER}"
+                        '''
                     }
                 }
             }
